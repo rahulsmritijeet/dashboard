@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Monitoring System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      overflow-y: auto;
+      padding: 50px 20px;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.6;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .orb1 {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      top: -100px;
+      left: -100px;
+    }
+
+    .orb2 {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      bottom: -50px;
+      right: -50px;
+    }
+
+    .orb3 {
+      width: 350px;
+      height: 350px;
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+      top: 50%;
+      left: 50%;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+
+    .main-wrapper {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1400px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .container {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2),
+                  inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .live-cam-container {
+      width: 450px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2),
+                  inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .live-cam-title {
+      color: white;
+      font-size: 1.8em;
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .live-indicator {
+      width: 12px;
+      height: 12px;
+      background: #ff4757;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+    }
+
+    .live-cam-frame {
+      width: 100%;
+      height: 600px;
+      border-radius: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 3.5em;
+      margin-bottom: 40px;
+      color: white;
+      font-weight: 300;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 35px;
+      gap: 15px;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 18px 25px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .tab-button.active {
+      background: rgba(79, 172, 254, 0.2);
+      border-color: rgba(79, 172, 254, 0.6);
+    }
+
+    .tab-content {
+      display: none;
+      animation: slideIn 0.5s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .value-display {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      padding: 50px;
+      text-align: center;
+      position: relative;
+      margin-bottom: 50px;
+    }
+
+    .value-label {
+      font-size: 1.8em;
+      margin-bottom: 25px;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .value-number {
+      font-size: 5em;
+      color: white;
+      font-family: 'Courier New', monospace;
+    }
+
+    .pump-status-btn {
+      font-size: 2em;
+      padding: 20px 60px;
+      border-radius: 15px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .pump-off-btn {
+      background: rgba(255, 71, 87, 0.15);
+      color: #ff4757;
+      border: 2px solid rgba(255, 71, 87, 0.5);
+      box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
+    }
+
+    .pump-on-btn {
+      background: rgba(46, 213, 115, 0.15);
+      color: #2ed573;
+      border: 2px solid rgba(46, 213, 115, 0.5);
+      box-shadow: 0 0 15px rgba(46, 213, 115, 0.4);
+    }
+
+    .progress-container {
+      margin-top: 40px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1s ease;
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+    }
+
+    .range-label {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .input-section {
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .value-input {
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1.1em;
+      width: 150px;
+      text-align: center;
+    }
+
+    .value-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .value-input:focus {
+      outline: none;
+      border-color: rgba(79, 172, 254, 0.6);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .suggestion-btn {
+      padding: 12px 25px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      color: white;
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .suggestion-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
+    }
+
+    .suggestion-btn:active {
+      transform: scale(0.98);
+    }
+
+    .optional-label {
+      font-size: 0.85em;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 10px;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .suggestion-box {
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      color: white;
+      font-size: 1em;
+      text-align: left;
+      position: relative;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 1.2em;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .current-value-indicator {
+      display: inline-block;
+      background: rgba(79, 172, 254, 0.2);
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+      color: white;
+    }
+
+    th {
+      background: rgba(79, 172, 254, 0.2);
+    }
+
+    @media (max-width: 1200px) {
+      .main-wrapper {
+        flex-direction: column;
+      }
+     
+      .live-cam-container {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <div class="main-wrapper">
+    <div class="container">
+      <h1>Dashboard</h1>
+
+      <div class="tabs">
+        <button class="tab-button active" onclick="showTab('ph')">pH Level</button>
+        <button class="tab-button" onclick="showTab('moisture')">Moisture Level</button>
+        <button class="tab-button" onclick="showTab('pump')">Pump Status</button>
+      </div>
+
+      <!-- pH LEVEL -->
+      <div id="ph" class="tab-content active">
+        <div class="value-display">
+          <div class="value-label">pH Level</div>
+          <div class="value-number"><span id="phValue">7.00</span></div>
+
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="phBar" style="width:50%"></div>
+            </div>
+            <div class="range-label">
+              <span>0</span><span>Neutral</span><span>14</span>
+            </div>
+          </div>
+
+          <div class="input-section">
+            <input type="number" id="phInput" class="value-input" placeholder="Custom pH" step="0.1" min="0" max="14">
+            <button class="suggestion-btn" onclick="showPhSuggestions()">
+              Get Suggestions
+            </button>
+          </div>
+          <div class="optional-label">
+            Click button to analyze current reading or enter custom value
+          </div>
+          <div id="phSuggestions" class="suggestion-box" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- MOISTURE LEVEL -->
+      <div id="moisture" class="tab-content">
+        <div class="value-display">
+          <div class="value-label">Moisture Level</div>
+          <div class="value-number">
+            <span id="moistureValue">685.00</span>
+            <span class="unit">PPM</span>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="moistureBar" style="width:50%"></div>
+            </div>
+            <div class="range-label">
+              <span>670</span><span>Optimal Range</span><span>700</span>
+            </div>
+          </div>
+
+          <div class="input-section">
+            <input type="number" id="moistureInput" class="value-input" placeholder="Custom PPM" step="1" min="0">
+            <button class="suggestion-btn" onclick="showMoistureSuggestions()">
+              Get Suggestions
+            </button>
+          </div>
+          <div class="optional-label">
+            Click button to analyze current reading or enter custom value
+          </div>
+          <div id="moistureSuggestions" class="suggestion-box" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- PUMP STATUS -->
+      <div id="pump" class="tab-content">
+        <div class="value-display">
+          <div class="value-label">Pump Status</div>
+          <button id="pumpButton" class="pump-status-btn pump-off-btn" onclick="togglePump()">OFF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE CAM SECTION -->
+    <div class="live-cam-container">
+      <div class="live-cam-title">
+        <span class="live-indicator"></span>
+        Live Camera Feed
+      </div>
+      <iframe
+        class="live-cam-frame"
+        src="http://10.0.11.97/"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabName) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-button');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      buttons.forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function togglePump() {
+      const btn = document.getElementById('pumpButton');
+      if (btn.textContent === 'OFF') {
+        btn.textContent = 'ON';
+        btn.classList.remove('pump-off-btn');
+        btn.classList.add('pump-on-btn');
+      
