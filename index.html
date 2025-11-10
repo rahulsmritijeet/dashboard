@@ -273,33 +273,12 @@
       gap: 15px;
     }
 
-    .value-input {
-      padding: 12px 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 1.1em;
-      width: 150px;
-      text-align: center;
-    }
-
-    .value-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .value-input:focus {
-      outline: none;
-      border-color: rgba(79, 172, 254, 0.6);
-      background: rgba(255, 255, 255, 0.15);
-    }
-
     .suggestion-btn {
       padding: 12px 25px;
       border-radius: 10px;
       border: none;
       cursor: pointer;
-      font-size: 1em;
+      font-size: 1.1em;
       color: white;
       background: linear-gradient(90deg, #4facfe, #00f2fe);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -330,10 +309,52 @@
       border-radius: 15px;
       padding: 20px;
       color: white;
-      font-size: 1em;
+      font-size: 1.1em;
       text-align: left;
       position: relative;
       animation: fadeIn 0.5s ease;
+      line-height: 1.6;
+    }
+
+    .suggestion-box h3 {
+      margin-bottom: 15px;
+      font-size: 1.3em;
+      color: #00f2fe;
+    }
+
+    .suggestion-box ul {
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+
+    .suggestion-box li {
+      margin-bottom: 8px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .status-good {
+      background: rgba(46, 213, 115, 0.2);
+      color: #2ed573;
+      border: 1px solid #2ed573;
+    }
+
+    .status-warning {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      border: 1px solid #ffc107;
+    }
+
+    .status-danger {
+      background: rgba(255, 71, 87, 0.2);
+      color: #ff4757;
+      border: 1px solid #ff4757;
     }
 
     @keyframes fadeIn {
@@ -358,34 +379,6 @@
 
     .close-btn:hover {
       background: rgba(255, 255, 255, 0.4);
-    }
-
-    .current-value-indicator {
-      display: inline-block;
-      background: rgba(79, 172, 254, 0.2);
-      padding: 2px 8px;
-      border-radius: 5px;
-      font-weight: bold;
-    }
-
-    table {
-      width: 100%;
-      margin-top: 15px;
-      border-collapse: collapse;
-    }
-
-    table, th, td {
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    th, td {
-      padding: 10px;
-      text-align: center;
-      color: white;
-    }
-
-    th {
-      background: rgba(79, 172, 254, 0.2);
     }
 
     @media (max-width: 1200px) {
@@ -426,18 +419,17 @@
               <div class="progress-fill" id="phBar" style="width:50%"></div>
             </div>
             <div class="range-label">
-              <span>0</span><span>Neutral</span><span>14</span>
+              <span>0</span><span>Neutral (7)</span><span>14</span>
             </div>
           </div>
 
           <div class="input-section">
-            <input type="number" id="phInput" class="value-input" placeholder="Custom pH" step="0.1" min="0" max="14">
             <button class="suggestion-btn" onclick="showPhSuggestions()">
-              Get Suggestions
+              Get pH Analysis & Recommendations
             </button>
           </div>
           <div class="optional-label">
-            Click button to analyze current reading or enter custom value
+            Click to analyze current pH reading and get farming recommendations
           </div>
           <div id="phSuggestions" class="suggestion-box" style="display:none;"></div>
         </div>
@@ -449,7 +441,7 @@
           <div class="value-label">Moisture Level</div>
           <div class="value-number">
             <span id="moistureValue">685.00</span>
-            <span class="unit">PPM</span>
+            <span class="unit" style="font-size: 0.3em;">PPM</span>
           </div>
 
           <div class="progress-container">
@@ -462,13 +454,12 @@
           </div>
 
           <div class="input-section">
-            <input type="number" id="moistureInput" class="value-input" placeholder="Custom PPM" step="1" min="0">
             <button class="suggestion-btn" onclick="showMoistureSuggestions()">
-              Get Suggestions
+              Get Moisture Analysis & Recommendations
             </button>
           </div>
           <div class="optional-label">
-            Click button to analyze current reading or enter custom value
+            Click to analyze current moisture reading and get irrigation recommendations
           </div>
           <div id="moistureSuggestions" class="suggestion-box" style="display:none;"></div>
         </div>
@@ -500,6 +491,26 @@
   </div>
 
   <script>
+    // Simulated sensor values (replace with actual sensor data)
+    let currentPhValue = 7.00;
+    let currentMoistureValue = 685.00;
+
+    // Update values periodically (simulate real sensor data)
+    function updateSensorValues() {
+      // Simulate pH fluctuation
+      currentPhValue = (6.5 + Math.random() * 1.5).toFixed(2);
+      document.getElementById('phValue').textContent = currentPhValue;
+      document.getElementById('phBar').style.width = (currentPhValue / 14 * 100) + '%';
+
+      // Simulate moisture fluctuation
+      currentMoistureValue = (670 + Math.random() * 30).toFixed(2);
+      document.getElementById('moistureValue').textContent = currentMoistureValue;
+      document.getElementById('moistureBar').style.width = ((currentMoistureValue - 670) / 30 * 100) + '%';
+    }
+
+    // Update sensor values every 5 seconds
+    setInterval(updateSensorValues, 5000);
+
     function showTab(tabName) {
       const tabs = document.querySelectorAll('.tab-content');
       const buttons = document.querySelectorAll('.tab-button');
@@ -515,4 +526,241 @@
         btn.textContent = 'ON';
         btn.classList.remove('pump-off-btn');
         btn.classList.add('pump-on-btn');
-      
+        alert('✅ Irrigation pump has been ACTIVATED\n\nThe system will begin watering your crops.');
+      } else {
+        btn.textContent = 'OFF';
+        btn.classList.remove('pump-on-btn');
+        btn.classList.add('pump-off-btn');
+        alert('🛑 Irrigation pump has been DEACTIVATED\n\nWater flow to crops has been stopped.');
+      }
+    }
+
+    function showPhSuggestions() {
+      const phValue = parseFloat(document.getElementById('phValue').textContent);
+      const suggestionBox = document.getElementById('phSuggestions');
+      let status, statusClass, suggestions;
+
+      if (phValue < 6.0) {
+        status = "⚠️ ACIDIC SOIL";
+        statusClass = "status-danger";
+        suggestions = `
+          <h3>📊 Soil Analysis Results</h3>
+          <span class="${statusClass}">${status}</span>
+          <p><strong>Current pH:</strong> ${phValue} (Too Acidic)</p>
+          
+          <h3>🌱 Recommended Actions:</h3>
+          <ul>
+            <li><strong>Apply Lime:</strong> Add 50-100 lbs of agricultural lime per 1000 sq ft</li>
+            <li><strong>Use Wood Ash:</strong> Apply 10-15 lbs per 1000 sq ft as organic alternative</li>
+            <li><strong>Add Dolomite:</strong> Provides calcium and magnesium while raising pH</li>
+            <li><strong>Reduce Fertilizer:</strong> Avoid ammonium-based fertilizers temporarily</li>
+          </ul>
+          
+          <h3>🌾 Suitable Crops for Current pH:</h3>
+          <ul>
+            <li>Blueberries (pH 4.5-5.5)</li>
+            <li>Potatoes (pH 5.0-6.0)</li>
+            <li>Sweet potatoes (pH 5.5-6.0)</li>
+          </ul>
+          
+          <h3>⏰ Timeline:</h3>
+          <p>Retest soil pH in 2-3 weeks after treatment. Full correction may take 2-3 months.</p>
+        `;
+        alert(`⚠️ ACIDIC SOIL DETECTED!\n\nCurrent pH: ${phValue}\n\n❗ Immediate Action Required:\n• Apply agricultural lime (50-100 lbs per 1000 sq ft)\n• Consider planting acid-tolerant crops\n• Retest in 2-3 weeks`);
+      } else if (phValue >= 6.0 && phValue <= 7.5) {
+        status = "✅ OPTIMAL pH";
+        statusClass = "status-good";
+        suggestions = `
+          <h3>📊 Soil Analysis Results</h3>
+          <span class="${statusClass}">${status}</span>
+          <p><strong>Current pH:</strong> ${phValue} (Ideal Range)</p>
+          
+          <h3>🌱 Optimal Conditions Achieved!</h3>
+          <p>Your soil pH is perfect for most crops. This range ensures:</p>
+          <ul>
+            <li>Maximum nutrient availability</li>
+            <li>Optimal microbial activity</li>
+            <li>Healthy root development</li>
+            <li>Better water retention</li>
+          </ul>
+          
+          <h3>🌾 Recommended Crops:</h3>
+          <ul>
+            <li><strong>Vegetables:</strong> Tomatoes, peppers, carrots, lettuce, corn</li>
+            <li><strong>Fruits:</strong> Strawberries, apples, grapes</li>
+            <li><strong>Grains:</strong> Wheat, rice, barley</li>
+            <li><strong>Legumes:</strong> Beans, peas, soybeans</li>
+          </ul>
+          
+          <h3>🔧 Maintenance Tips:</h3>
+          <ul>
+            <li>Continue regular soil testing every 3-6 months</li>
+            <li>Maintain organic matter with compost</li>
+            <li>Use balanced fertilizers</li>
+          </ul>
+        `;
+        alert(`✅ OPTIMAL pH DETECTED!\n\nCurrent pH: ${phValue}\n\n✨ Excellent Conditions:\n• Perfect for most crops\n• Maximum nutrient availability\n• Continue current practices`);
+      } else {
+        status = "⚠️ ALKALINE SOIL";
+        statusClass = "status-warning";
+        suggestions = `
+          <h3>📊 Soil Analysis Results</h3>
+          <span class="${statusClass}">${status}</span>
+          <p><strong>Current pH:</strong> ${phValue} (Too Alkaline)</p>
+          
+          <h3>🌱 Recommended Actions:</h3>
+          <ul>
+            <li><strong>Apply Sulfur:</strong> Add 1-2 lbs elemental sulfur per 100 sq ft</li>
+            <li><strong>Use Aluminum Sulfate:</strong> Quick-acting, apply 5 lbs per 100 sq ft</li>
+            <li><strong>Add Organic Matter:</strong> Compost, peat moss, or pine needles</li>
+            <li><strong>Iron Sulfate:</strong> Also adds iron to soil (3-4 lbs per 100 sq ft)</li>
+          </ul>
+          
+          <h3>🌾 Suitable Crops for Current pH:</h3>
+          <ul>
+            <li>Asparagus (pH 7.0-8.0)</li>
+            <li>Cabbage family (pH 6.5-7.5)</li>
+            <li>Beets (pH 6.5-8.0)</li>
+          </ul>
+          
+          <h3>⚠️ Nutrient Concerns:</h3>
+          <p>High pH can cause iron, manganese, and phosphorus deficiencies. Watch for yellowing leaves.</p>
+          
+          <h3>⏰ Timeline:</h3>
+          <p>Sulfur takes 2-3 months to lower pH. Aluminum sulfate works within weeks.</p>
+        `;
+        alert(`⚠️ ALKALINE SOIL DETECTED!\n\nCurrent pH: ${phValue}\n\n❗ Immediate Action Required:\n• Apply elemental sulfur (1-2 lbs per 100 sq ft)\n• Add organic matter (compost/peat moss)\n• Monitor for nutrient deficiencies`);
+      }
+
+      suggestionBox.innerHTML = suggestions + '<button class="close-btn" onclick="closeSuggestions(\'ph\')">×</button>';
+      suggestionBox.style.display = 'block';
+    }
+
+    function showMoistureSuggestions() {
+      const moistureValue = parseFloat(document.getElementById('moistureValue').textContent);
+      const suggestionBox = document.getElementById('moistureSuggestions');
+      let status, statusClass, suggestions;
+
+      if (moistureValue < 670) {
+        status = "💧 LOW MOISTURE";
+        statusClass = "status-danger";
+        suggestions = `
+          <h3>📊 Moisture Analysis Results</h3>
+          <span class="${statusClass}">${status}</span>
+          <p><strong>Current Level:</strong> ${moistureValue} PPM (Below Optimal)</p>
+          
+          <h3>💧 Irrigation Required!</h3>
+          <ul>
+            <li><strong>Immediate Action:</strong> Start irrigation system NOW</li>
+            <li><strong>Water Amount:</strong> Apply 1-1.5 inches of water</li>
+            <li><strong>Duration:</strong> Run sprinklers for 30-45 minutes</li>
+            <li><strong>Frequency:</strong> Check moisture again in 4-6 hours</li>
+          </ul>
+          
+          <h3>🚨 Risk Factors:</h3>
+          <ul>
+            <li>Wilting and stress in plants</li>
+            <li>Reduced nutrient uptake</li>
+            <li>Stunted growth</li>
+            <li>Lower yield potential</li>
+          </ul>
+          
+          <h3>🔧 Prevention Tips:</h3>
+          <ul>
+            <li>Install drip irrigation for consistent moisture</li>
+            <li>Add mulch to retain soil moisture</li>
+            <li>Consider soil amendments like compost</li>
+            <li>Schedule regular irrigation cycles</li>
+          </ul>
+        `;
+        alert(`💧 LOW MOISTURE ALERT!\n\nCurrent Level: ${moistureValue} PPM\n\n⚠️ IMMEDIATE ACTION:\n• START IRRIGATION NOW\n• Apply 1-1.5 inches of water\n• Risk of crop stress and wilting\n• Check again in 4-6 hours`);
+      } else if (moistureValue >= 670 && moistureValue <= 700) {
+        status = "✅ OPTIMAL MOISTURE";
+        statusClass = "status-good";
+        suggestions = `
+          <h3>📊 Moisture Analysis Results</h3>
+          <span class="${statusClass}">${status}</span>
+          <p><strong>Current Level:</strong> ${moistureValue} PPM (Perfect Range)</p>
+          
+          <h3>🌱 Excellent Moisture Conditions!</h3>
+          <p>Your soil moisture is ideal for:</p>
+          <ul>
+            <li>Optimal root water absorption</li>
+            <li>Maximum nutrient transport</li>
+            <li>Healthy microbial activity</li>
+            <li>Perfect growing conditions</li>
+          </ul>
+          
+          <h3>📅 Maintenance Schedule:</h3>
+          <ul>
+            <li><strong>Morning Check:</strong> Test moisture at 6-7 AM</li>
+            <li><strong>Evening Check:</strong> Test again at 5-6 PM</li>
+            <li><strong>Light Watering:</strong> If needed, apply 0.5 inches</li>
+            <li><strong>Next Full Irrigation:</strong> In 2-3 days</li>
+          </ul>
+          
+          <h3>✨ Best Practices:</h3>
+          <ul>
+            <li>Maintain current irrigation schedule</li>
+            <li>Continue monitoring daily</li>
+            <li>Adjust based on weather conditions</li>
+          </ul>
+        `;
+        alert(`✅ OPTIMAL MOISTURE LEVEL!\n\nCurrent Level: ${moistureValue} PPM\n\n✨ Perfect Conditions:\n• Ideal for crop growth\n• Maintain current schedule\n• Check again tomorrow`);
+      } else {
+        status = "⚠️ HIGH MOISTURE";
+        statusClass = "status-warning";
+        suggestions = `
+          <h3>📊 Moisture Analysis Results</h3>
+          <span class="${statusClass}">${status}</span>
+          <p><strong>Current Level:</strong> ${moistureValue} PPM (Above Optimal)</p>
+          
+          <h3>💦 Over-Irrigation Warning!</h3>
+          <ul>
+            <li><strong>Immediate Action:</strong> STOP all irrigation</li>
+            <li><strong>Drainage:</strong> Check field drainage systems</li>
+            <li><strong>Aeration:</strong> Consider soil aeration if waterlogged</li>
+            <li><strong>Wait Period:</strong> No watering for 24-48 hours</li>
+          </ul>
+          
+          <h3>⚠️ Risk Factors:</h3>
+          <ul>
+            <li>Root rot and fungal diseases</li>
+            <li>Oxygen deprivation in root zone</li>
+            <li>Nutrient leaching</li>
+            <li>Reduced soil temperature</li>
+          </ul>
+          
+          <h3>🔧 Corrective Measures:</h3>
+          <ul>
+            <li>Improve field drainage</li>
+            <li>Add organic matter to improve soil structure</li>
+            <li>Consider raised beds for better drainage</li>
+            <li>Monitor for signs of plant stress</li>
+          </ul>
+          
+          <h3>🔍 Watch For:</h3>
+          <p>Yellow leaves, wilting despite wet soil, fungal growth, or bad odors from soil.</p>
+        `;
+        alert(`⚠️ HIGH MOISTURE WARNING!\n\nCurrent Level: ${moistureValue} PPM\n\n🛑 IMMEDIATE ACTION:\n• STOP ALL IRRIGATION\n• Risk of root rot\n• Check drainage systems\n• Wait 24-48 hours before next check`);
+      }
+
+      suggestionBox.innerHTML = suggestions + '<button class="close-btn" onclick="closeSuggestions(\'moisture\')">×</button>';
+      suggestionBox.style.display = 'block';
+    }
+
+    function closeSuggestions(type) {
+      if (type === 'ph') {
+        document.getElementById('phSuggestions').style.display = 'none';
+      } else {
+        document.getElementById('moistureSuggestions').style.display = 'none';
+      }
+    }
+
+    // Initialize sensor values on load
+    window.onload = function() {
+      updateSensorValues();
+    };
+  </script>
+</body>
+</html>
