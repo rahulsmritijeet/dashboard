@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Monitoring System</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * {
       margin: 0;
@@ -136,8 +137,8 @@
 
     h1 {
       text-align: center;
-      font-size: 3.5em;
-      margin-bottom: 40px;
+      font-size: 3em;
+      margin-bottom: 30px;
       color: white;
       font-weight: 300;
       letter-spacing: 8px;
@@ -147,28 +148,44 @@
     .tabs {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 35px;
-      gap: 15px;
+      margin-bottom: 30px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .tab-button {
       flex: 1;
-      padding: 18px 25px;
+      min-width: 120px;
+      padding: 15px 20px;
       background: rgba(255, 255, 255, 0.1);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 15px;
       cursor: pointer;
-      font-size: 1.1em;
+      font-size: 1em;
       font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
       transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
     }
 
     .tab-button.active {
-      background: rgba(79, 172, 254, 0.2);
+      background: rgba(79, 172, 254, 0.3);
       border-color: rgba(79, 172, 254, 0.6);
+      box-shadow: 0 0 20px rgba(79, 172, 254, 0.3);
+    }
+
+    .tab-icon {
+      font-size: 1.3em;
     }
 
     .tab-content {
@@ -185,200 +202,168 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .value-display {
+    .sensor-card {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 25px;
-      padding: 50px;
-      text-align: center;
-      position: relative;
-      margin-bottom: 50px;
+      padding: 30px;
     }
 
-    .value-label {
-      font-size: 1.8em;
-      margin-bottom: 25px;
-      color: rgba(255, 255, 255, 0.9);
-      text-transform: uppercase;
-      letter-spacing: 3px;
-    }
-
-    .value-number {
-      font-size: 5em;
-      color: white;
-      font-family: 'Courier New', monospace;
-    }
-
-    .pump-status-btn {
-      font-size: 2em;
-      padding: 20px 60px;
-      border-radius: 15px;
-      border: none;
-      cursor: pointer;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .pump-off-btn {
-      background: rgba(255, 71, 87, 0.15);
-      color: #ff4757;
-      border: 2px solid rgba(255, 71, 87, 0.5);
-      box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
-    }
-
-    .pump-on-btn {
-      background: rgba(46, 213, 115, 0.15);
-      color: #2ed573;
-      border: 2px solid rgba(46, 213, 115, 0.5);
-      box-shadow: 0 0 15px rgba(46, 213, 115, 0.4);
-    }
-
-    .progress-container {
-      margin-top: 40px;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 15px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 1s ease;
-      background: linear-gradient(90deg, #4facfe, #00f2fe);
-    }
-
-    .range-label {
+    .sensor-header {
       display: flex;
       justify-content: space-between;
-      margin-top: 10px;
-      font-size: 0.9em;
-      color: rgba(255, 255, 255, 0.6);
+      align-items: center;
+      margin-bottom: 25px;
     }
 
-    .input-section {
-      margin-top: 25px;
+    .sensor-info {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 15px;
     }
 
-    .suggestion-btn {
-      padding: 12px 25px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-size: 1.1em;
-      color: white;
-      background: linear-gradient(90deg, #4facfe, #00f2fe);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
-    }
-
-    .suggestion-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
-    }
-
-    .suggestion-btn:active {
-      transform: scale(0.98);
-    }
-
-    .optional-label {
-      font-size: 0.85em;
-      color: rgba(255, 255, 255, 0.5);
-      margin-top: 10px;
-      text-align: center;
-      font-style: italic;
-    }
-
-    .suggestion-box {
-      margin-top: 20px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 15px;
-      padding: 20px;
-      color: white;
-      font-size: 1.1em;
-      text-align: left;
-      position: relative;
-      animation: fadeIn 0.5s ease;
-      line-height: 1.6;
-    }
-
-    .suggestion-box h3 {
-      margin-bottom: 15px;
-      font-size: 1.3em;
-      color: #00f2fe;
-    }
-
-    .suggestion-box ul {
-      margin-left: 20px;
-      margin-top: 10px;
-    }
-
-    .suggestion-box li {
-      margin-bottom: 8px;
-    }
-
-    .status-indicator {
-      display: inline-block;
-      padding: 5px 15px;
+    .sensor-icon {
+      font-size: 3em;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sensor-details h2 {
+      color: white;
+      font-size: 1.5em;
+      font-weight: 400;
+      margin-bottom: 5px;
+    }
+
+    .sensor-details .status {
+      font-size: 0.9em;
+      padding: 5px 12px;
+      border-radius: 20px;
+      display: inline-block;
     }
 
     .status-good {
       background: rgba(46, 213, 115, 0.2);
       color: #2ed573;
-      border: 1px solid #2ed573;
+      border: 1px solid rgba(46, 213, 115, 0.5);
     }
 
     .status-warning {
       background: rgba(255, 193, 7, 0.2);
       color: #ffc107;
-      border: 1px solid #ffc107;
+      border: 1px solid rgba(255, 193, 7, 0.5);
     }
 
     .status-danger {
       background: rgba(255, 71, 87, 0.2);
       color: #ff4757;
-      border: 1px solid #ff4757;
+      border: 1px solid rgba(255, 71, 87, 0.5);
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .current-value {
+      text-align: right;
     }
 
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
+    .value-number {
+      font-size: 3.5em;
       color: white;
-      font-size: 1.2em;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-      transition: background 0.2s ease;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      line-height: 1;
     }
 
-    .close-btn:hover {
-      background: rgba(255, 255, 255, 0.4);
+    .value-unit {
+      font-size: 1.2em;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 5px;
+    }
+
+    .chart-container {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 20px;
+      height: 300px;
+      position: relative;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .chart-title {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1em;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .update-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85em;
+    }
+
+    .update-dot {
+      width: 8px;
+      height: 8px;
+      background: #2ed573;
+      border-radius: 50%;
+      animation: blink 3s infinite;
+    }
+
+    @keyframes blink {
+      0%, 90% { opacity: 1; }
+      95% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      color: white;
+      font-size: 1.4em;
+      font-weight: 500;
+    }
+
+    .stat-value.high {
+      color: #ff6b6b;
+    }
+
+    .stat-value.low {
+      color: #4facfe;
+    }
+
+    .stat-value.avg {
+      color: #2ed573;
     }
 
     @media (max-width: 1200px) {
@@ -388,6 +373,27 @@
      
       .live-cam-container {
         width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .sensor-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      
+      .current-value {
+        text-align: center;
+      }
+      
+      .stats-row {
+        flex-wrap: wrap;
+        gap: 15px;
       }
     }
   </style>
@@ -403,73 +409,201 @@
       <h1>Dashboard</h1>
 
       <div class="tabs">
-        <button class="tab-button active" onclick="showTab('ph')">pH Level</button>
-        <button class="tab-button" onclick="showTab('moisture')">Moisture Level</button>
-        <button class="tab-button" onclick="showTab('pump')">Pump Status</button>
+        <button class="tab-button active" onclick="showTab('temperature', this)">
+          <span class="tab-icon">🌡️</span>
+          Temperature
+        </button>
+        <button class="tab-button" onclick="showTab('humidity', this)">
+          <span class="tab-icon">💧</span>
+          Humidity
+        </button>
+        <button class="tab-button" onclick="showTab('moisture', this)">
+          <span class="tab-icon">🌱</span>
+          Soil Moisture
+        </button>
+        <button class="tab-button" onclick="showTab('airquality', this)">
+          <span class="tab-icon">🌬️</span>
+          Air Quality
+        </button>
       </div>
 
-      <!-- pH LEVEL -->
-      <div id="ph" class="tab-content active">
-        <div class="value-display">
-          <div class="value-label">pH Level</div>
-          <div class="value-number"><span id="phValue">7.00</span></div>
-
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress-fill" id="phBar" style="width:50%"></div>
+      <!-- TEMPERATURE -->
+      <div id="temperature" class="tab-content active">
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <div class="sensor-info">
+              <div class="sensor-icon">🌡️</div>
+              <div class="sensor-details">
+                <h2>Temperature</h2>
+                <span id="tempStatus" class="status status-good">Normal</span>
+              </div>
             </div>
-            <div class="range-label">
-              <span>0</span><span>Neutral (7)</span><span>14</span>
+            <div class="current-value">
+              <div class="value-number"><span id="tempValue">25.0</span></div>
+              <div class="value-unit">°C</div>
             </div>
           </div>
-
-          <div class="input-section">
-            <button class="suggestion-btn" onclick="showPhSuggestions()">
-              Get pH Analysis & Recommendations
-            </button>
+          
+          <div class="chart-container">
+            <div class="chart-header">
+              <span class="chart-title">Real-time Temperature Data</span>
+              <div class="update-indicator">
+                <span class="update-dot"></span>
+                Updates every 3 seconds
+              </div>
+            </div>
+            <canvas id="tempChart"></canvas>
           </div>
-          <div class="optional-label">
-            Click to analyze current pH reading and get farming recommendations
+          
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-label">Min</div>
+              <div class="stat-value low" id="tempMin">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Average</div>
+              <div class="stat-value avg" id="tempAvg">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Max</div>
+              <div class="stat-value high" id="tempMax">--</div>
+            </div>
           </div>
-          <div id="phSuggestions" class="suggestion-box" style="display:none;"></div>
         </div>
       </div>
 
-      <!-- MOISTURE LEVEL -->
+      <!-- HUMIDITY -->
+      <div id="humidity" class="tab-content">
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <div class="sensor-info">
+              <div class="sensor-icon">💧</div>
+              <div class="sensor-details">
+                <h2>Humidity</h2>
+                <span id="humStatus" class="status status-good">Normal</span>
+              </div>
+            </div>
+            <div class="current-value">
+              <div class="value-number"><span id="humValue">55.0</span></div>
+              <div class="value-unit">%</div>
+            </div>
+          </div>
+          
+          <div class="chart-container">
+            <div class="chart-header">
+              <span class="chart-title">Real-time Humidity Data</span>
+              <div class="update-indicator">
+                <span class="update-dot"></span>
+                Updates every 3 seconds
+              </div>
+            </div>
+            <canvas id="humChart"></canvas>
+          </div>
+          
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-label">Min</div>
+              <div class="stat-value low" id="humMin">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Average</div>
+              <div class="stat-value avg" id="humAvg">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Max</div>
+              <div class="stat-value high" id="humMax">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOIL MOISTURE -->
       <div id="moisture" class="tab-content">
-        <div class="value-display">
-          <div class="value-label">Moisture Level</div>
-          <div class="value-number">
-            <span id="moistureValue">685.00</span>
-            <span class="unit" style="font-size: 0.3em;">PPM</span>
-          </div>
-
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress-fill" id="moistureBar" style="width:50%"></div>
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <div class="sensor-info">
+              <div class="sensor-icon">🌱</div>
+              <div class="sensor-details">
+                <h2>Soil Moisture</h2>
+                <span id="moistStatus" class="status status-good">Normal</span>
+              </div>
             </div>
-            <div class="range-label">
-              <span>670</span><span>Optimal Range</span><span>700</span>
+            <div class="current-value">
+              <div class="value-number"><span id="moistValue">45.0</span></div>
+              <div class="value-unit">%</div>
             </div>
           </div>
-
-          <div class="input-section">
-            <button class="suggestion-btn" onclick="showMoistureSuggestions()">
-              Get Moisture Analysis & Recommendations
-            </button>
+          
+          <div class="chart-container">
+            <div class="chart-header">
+              <span class="chart-title">Real-time Soil Moisture Data</span>
+              <div class="update-indicator">
+                <span class="update-dot"></span>
+                Updates every 3 seconds
+              </div>
+            </div>
+            <canvas id="moistChart"></canvas>
           </div>
-          <div class="optional-label">
-            Click to analyze current moisture reading and get irrigation recommendations
+          
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-label">Min</div>
+              <div class="stat-value low" id="moistMin">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Average</div>
+              <div class="stat-value avg" id="moistAvg">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Max</div>
+              <div class="stat-value high" id="moistMax">--</div>
+            </div>
           </div>
-          <div id="moistureSuggestions" class="suggestion-box" style="display:none;"></div>
         </div>
       </div>
 
-      <!-- PUMP STATUS -->
-      <div id="pump" class="tab-content">
-        <div class="value-display">
-          <div class="value-label">Pump Status</div>
-          <button id="pumpButton" class="pump-status-btn pump-off-btn" onclick="togglePump()">OFF</button>
+      <!-- AIR QUALITY -->
+      <div id="airquality" class="tab-content">
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <div class="sensor-info">
+              <div class="sensor-icon">🌬️</div>
+              <div class="sensor-details">
+                <h2>Air Quality Index</h2>
+                <span id="aqiStatus" class="status status-good">Good</span>
+              </div>
+            </div>
+            <div class="current-value">
+              <div class="value-number"><span id="aqiValue">45</span></div>
+              <div class="value-unit">AQI</div>
+            </div>
+          </div>
+          
+          <div class="chart-container">
+            <div class="chart-header">
+              <span class="chart-title">Real-time Air Quality Data</span>
+              <div class="update-indicator">
+                <span class="update-dot"></span>
+                Updates every 3 seconds
+              </div>
+            </div>
+            <canvas id="aqiChart"></canvas>
+          </div>
+          
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-label">Min</div>
+              <div class="stat-value low" id="aqiMin">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Average</div>
+              <div class="stat-value avg" id="aqiAvg">--</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Max</div>
+              <div class="stat-value high" id="aqiMax">--</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -491,275 +625,273 @@
   </div>
 
   <script>
-    // Simulated sensor values (replace with actual sensor data)
-    let currentPhValue = 7.00;
-    let currentMoistureValue = 685.00;
+    // Data storage for each sensor
+    const maxDataPoints = 20;
+    const sensorData = {
+      temperature: { values: [], labels: [], chart: null },
+      humidity: { values: [], labels: [], chart: null },
+      moisture: { values: [], labels: [], chart: null },
+      airquality: { values: [], labels: [], chart: null }
+    };
 
-    // Update values periodically (simulate real sensor data)
-    function updateSensorValues() {
-      // Simulate pH fluctuation
-      currentPhValue = (6.5 + Math.random() * 1.5).toFixed(2);
-      document.getElementById('phValue').textContent = currentPhValue;
-      document.getElementById('phBar').style.width = (currentPhValue / 14 * 100) + '%';
+    // Chart configuration
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 500
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          ticks: {
+            color: 'rgba(255, 255, 255, 0.6)',
+            maxRotation: 0,
+            maxTicksLimit: 6
+          }
+        },
+        y: {
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          ticks: {
+            color: 'rgba(255, 255, 255, 0.6)'
+          }
+        }
+      },
+      elements: {
+        point: {
+          radius: 4,
+          hoverRadius: 6
+        },
+        line: {
+          tension: 0.4
+        }
+      }
+    };
 
-      // Simulate moisture fluctuation
-      currentMoistureValue = (670 + Math.random() * 30).toFixed(2);
-      document.getElementById('moistureValue').textContent = currentMoistureValue;
-      document.getElementById('moistureBar').style.width = ((currentMoistureValue - 670) / 30 * 100) + '%';
+    // Create gradient for charts
+    function createGradient(ctx, color1, color2) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+      gradient.addColorStop(0, color1);
+      gradient.addColorStop(1, color2);
+      return gradient;
     }
 
-    // Update sensor values every 5 seconds
-    setInterval(updateSensorValues, 5000);
+    // Initialize charts
+    function initCharts() {
+      // Temperature Chart
+      const tempCtx = document.getElementById('tempChart').getContext('2d');
+      sensorData.temperature.chart = new Chart(tempCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Temperature',
+            data: [],
+            borderColor: '#ff6b6b',
+            backgroundColor: createGradient(tempCtx, 'rgba(255, 107, 107, 0.3)', 'rgba(255, 107, 107, 0)'),
+            fill: true,
+            borderWidth: 3
+          }]
+        },
+        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 15, max: 40 } } }
+      });
 
-    function showTab(tabName) {
+      // Humidity Chart
+      const humCtx = document.getElementById('humChart').getContext('2d');
+      sensorData.humidity.chart = new Chart(humCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Humidity',
+            data: [],
+            borderColor: '#4facfe',
+            backgroundColor: createGradient(humCtx, 'rgba(79, 172, 254, 0.3)', 'rgba(79, 172, 254, 0)'),
+            fill: true,
+            borderWidth: 3
+          }]
+        },
+        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 20, max: 100 } } }
+      });
+
+      // Soil Moisture Chart
+      const moistCtx = document.getElementById('moistChart').getContext('2d');
+      sensorData.moisture.chart = new Chart(moistCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Soil Moisture',
+            data: [],
+            borderColor: '#2ed573',
+            backgroundColor: createGradient(moistCtx, 'rgba(46, 213, 115, 0.3)', 'rgba(46, 213, 115, 0)'),
+            fill: true,
+            borderWidth: 3
+          }]
+        },
+        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 10, max: 90 } } }
+      });
+
+      // Air Quality Chart
+      const aqiCtx = document.getElementById('aqiChart').getContext('2d');
+      sensorData.airquality.chart = new Chart(aqiCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'AQI',
+            data: [],
+            borderColor: '#a55eea',
+            backgroundColor: createGradient(aqiCtx, 'rgba(165, 94, 234, 0.3)', 'rgba(165, 94, 234, 0)'),
+            fill: true,
+            borderWidth: 3
+          }]
+        },
+        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 0, max: 200 } } }
+      });
+    }
+
+    // Generate fake sensor data
+    function generateSensorData() {
+      const now = new Date();
+      const timeLabel = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      // Temperature: 20-35°C with slight variations
+      const temp = (22 + Math.random() * 10 + Math.sin(Date.now() / 10000) * 3).toFixed(1);
+      updateSensor('temperature', temp, timeLabel, {
+        valueId: 'tempValue',
+        statusId: 'tempStatus',
+        minId: 'tempMin',
+        maxId: 'tempMax',
+        avgId: 'tempAvg',
+        thresholds: { low: 18, high: 32 },
+        labels: { good: 'Normal', warning: 'High', danger: 'Critical' }
+      });
+
+      // Humidity: 40-75%
+      const hum = (45 + Math.random() * 25 + Math.cos(Date.now() / 12000) * 5).toFixed(1);
+      updateSensor('humidity', hum, timeLabel, {
+        valueId: 'humValue',
+        statusId: 'humStatus',
+        minId: 'humMin',
+        maxId: 'humMax',
+        avgId: 'humAvg',
+        thresholds: { low: 30, high: 70 },
+        labels: { good: 'Normal', warning: 'High', danger: 'Very High' }
+      });
+
+      // Soil Moisture: 30-70%
+      const moist = (35 + Math.random() * 30 + Math.sin(Date.now() / 15000) * 5).toFixed(1);
+      updateSensor('moisture', moist, timeLabel, {
+        valueId: 'moistValue',
+        statusId: 'moistStatus',
+        minId: 'moistMin',
+        maxId: 'moistMax',
+        avgId: 'moistAvg',
+        thresholds: { low: 25, high: 65 },
+        labels: { good: 'Optimal', warning: 'Dry', danger: 'Critical' }
+      });
+
+      // Air Quality Index: 20-150
+      const aqi = Math.round(30 + Math.random() * 70 + Math.sin(Date.now() / 8000) * 20);
+      updateSensor('airquality', aqi, timeLabel, {
+        valueId: 'aqiValue',
+        statusId: 'aqiStatus',
+        minId: 'aqiMin',
+        maxId: 'aqiMax',
+        avgId: 'aqiAvg',
+        thresholds: { low: 0, high: 100 },
+        labels: { good: 'Good', warning: 'Moderate', danger: 'Unhealthy' }
+      });
+    }
+
+    // Update sensor data and chart
+    function updateSensor(sensorType, value, timeLabel, config) {
+      const data = sensorData[sensorType];
+      const numValue = parseFloat(value);
+
+      // Update value display
+      document.getElementById(config.valueId).textContent = value;
+
+      // Update status
+      const statusEl = document.getElementById(config.statusId);
+      if (numValue > config.thresholds.high) {
+        statusEl.className = 'status status-danger';
+        statusEl.textContent = config.labels.danger;
+      } else if (numValue < config.thresholds.low) {
+        statusEl.className = 'status status-warning';
+        statusEl.textContent = config.labels.warning;
+      } else {
+        statusEl.className = 'status status-good';
+        statusEl.textContent = config.labels.good;
+      }
+
+      // Add data point
+      data.values.push(numValue);
+      data.labels.push(timeLabel);
+
+      // Keep only last N points
+      if (data.values.length > maxDataPoints) {
+        data.values.shift();
+        data.labels.shift();
+      }
+
+      // Update chart
+      data.chart.data.labels = data.labels;
+      data.chart.data.datasets[0].data = data.values;
+      data.chart.update('none');
+
+      // Update statistics
+      if (data.values.length > 0) {
+        const min = Math.min(...data.values).toFixed(1);
+        const max = Math.max(...data.values).toFixed(1);
+        const avg = (data.values.reduce((a, b) => a + b, 0) / data.values.length).toFixed(1);
+        
+        document.getElementById(config.minId).textContent = min + (sensorType === 'temperature' ? '°C' : sensorType === 'airquality' ? '' : '%');
+        document.getElementById(config.maxId).textContent = max + (sensorType === 'temperature' ? '°C' : sensorType === 'airquality' ? '' : '%');
+        document.getElementById(config.avgId).textContent = avg + (sensorType === 'temperature' ? '°C' : sensorType === 'airquality' ? '' : '%');
+      }
+    }
+
+    // Tab switching
+    function showTab(tabName, button) {
       const tabs = document.querySelectorAll('.tab-content');
       const buttons = document.querySelectorAll('.tab-button');
+      
       tabs.forEach(tab => tab.classList.remove('active'));
       buttons.forEach(btn => btn.classList.remove('active'));
+      
       document.getElementById(tabName).classList.add('active');
-      event.target.classList.add('active');
+      button.classList.add('active');
+
+      // Resize chart when tab becomes visible
+      setTimeout(() => {
+        if (sensorData[tabName] && sensorData[tabName].chart) {
+          sensorData[tabName].chart.resize();
+        }
+      }, 100);
     }
 
-    function togglePump() {
-      const btn = document.getElementById('pumpButton');
-      if (btn.textContent === 'OFF') {
-        btn.textContent = 'ON';
-        btn.classList.remove('pump-off-btn');
-        btn.classList.add('pump-on-btn');
-        alert('✅ Irrigation pump has been ACTIVATED\n\nThe system will begin watering your crops.');
-      } else {
-        btn.textContent = 'OFF';
-        btn.classList.remove('pump-on-btn');
-        btn.classList.add('pump-off-btn');
-        alert('🛑 Irrigation pump has been DEACTIVATED\n\nWater flow to crops has been stopped.');
-      }
-    }
-
-    function showPhSuggestions() {
-      const phValue = parseFloat(document.getElementById('phValue').textContent);
-      const suggestionBox = document.getElementById('phSuggestions');
-      let status, statusClass, suggestions;
-
-      if (phValue < 6.0) {
-        status = "⚠️ ACIDIC SOIL";
-        statusClass = "status-danger";
-        suggestions = `
-          <h3>📊 Soil Analysis Results</h3>
-          <span class="${statusClass}">${status}</span>
-          <p><strong>Current pH:</strong> ${phValue} (Too Acidic)</p>
-          
-          <h3>🌱 Recommended Actions:</h3>
-          <ul>
-            <li><strong>Apply Lime:</strong> Add 50-100 lbs of agricultural lime per 1000 sq ft</li>
-            <li><strong>Use Wood Ash:</strong> Apply 10-15 lbs per 1000 sq ft as organic alternative</li>
-            <li><strong>Add Dolomite:</strong> Provides calcium and magnesium while raising pH</li>
-            <li><strong>Reduce Fertilizer:</strong> Avoid ammonium-based fertilizers temporarily</li>
-          </ul>
-          
-          <h3>🌾 Suitable Crops for Current pH:</h3>
-          <ul>
-            <li>Blueberries (pH 4.5-5.5)</li>
-            <li>Potatoes (pH 5.0-6.0)</li>
-            <li>Sweet potatoes (pH 5.5-6.0)</li>
-          </ul>
-          
-          <h3>⏰ Timeline:</h3>
-          <p>Retest soil pH in 2-3 weeks after treatment. Full correction may take 2-3 months.</p>
-        `;
-        alert(`⚠️ ACIDIC SOIL DETECTED!\n\nCurrent pH: ${phValue}\n\n❗ Immediate Action Required:\n• Apply agricultural lime (50-100 lbs per 1000 sq ft)\n• Consider planting acid-tolerant crops\n• Retest in 2-3 weeks`);
-      } else if (phValue >= 6.0 && phValue <= 7.5) {
-        status = "✅ OPTIMAL pH";
-        statusClass = "status-good";
-        suggestions = `
-          <h3>📊 Soil Analysis Results</h3>
-          <span class="${statusClass}">${status}</span>
-          <p><strong>Current pH:</strong> ${phValue} (Ideal Range)</p>
-          
-          <h3>🌱 Optimal Conditions Achieved!</h3>
-          <p>Your soil pH is perfect for most crops. This range ensures:</p>
-          <ul>
-            <li>Maximum nutrient availability</li>
-            <li>Optimal microbial activity</li>
-            <li>Healthy root development</li>
-            <li>Better water retention</li>
-          </ul>
-          
-          <h3>🌾 Recommended Crops:</h3>
-          <ul>
-            <li><strong>Vegetables:</strong> Tomatoes, peppers, carrots, lettuce, corn</li>
-            <li><strong>Fruits:</strong> Strawberries, apples, grapes</li>
-            <li><strong>Grains:</strong> Wheat, rice, barley</li>
-            <li><strong>Legumes:</strong> Beans, peas, soybeans</li>
-          </ul>
-          
-          <h3>🔧 Maintenance Tips:</h3>
-          <ul>
-            <li>Continue regular soil testing every 3-6 months</li>
-            <li>Maintain organic matter with compost</li>
-            <li>Use balanced fertilizers</li>
-          </ul>
-        `;
-        alert(`✅ OPTIMAL pH DETECTED!\n\nCurrent pH: ${phValue}\n\n✨ Excellent Conditions:\n• Perfect for most crops\n• Maximum nutrient availability\n• Continue current practices`);
-      } else {
-        status = "⚠️ ALKALINE SOIL";
-        statusClass = "status-warning";
-        suggestions = `
-          <h3>📊 Soil Analysis Results</h3>
-          <span class="${statusClass}">${status}</span>
-          <p><strong>Current pH:</strong> ${phValue} (Too Alkaline)</p>
-          
-          <h3>🌱 Recommended Actions:</h3>
-          <ul>
-            <li><strong>Apply Sulfur:</strong> Add 1-2 lbs elemental sulfur per 100 sq ft</li>
-            <li><strong>Use Aluminum Sulfate:</strong> Quick-acting, apply 5 lbs per 100 sq ft</li>
-            <li><strong>Add Organic Matter:</strong> Compost, peat moss, or pine needles</li>
-            <li><strong>Iron Sulfate:</strong> Also adds iron to soil (3-4 lbs per 100 sq ft)</li>
-          </ul>
-          
-          <h3>🌾 Suitable Crops for Current pH:</h3>
-          <ul>
-            <li>Asparagus (pH 7.0-8.0)</li>
-            <li>Cabbage family (pH 6.5-7.5)</li>
-            <li>Beets (pH 6.5-8.0)</li>
-          </ul>
-          
-          <h3>⚠️ Nutrient Concerns:</h3>
-          <p>High pH can cause iron, manganese, and phosphorus deficiencies. Watch for yellowing leaves.</p>
-          
-          <h3>⏰ Timeline:</h3>
-          <p>Sulfur takes 2-3 months to lower pH. Aluminum sulfate works within weeks.</p>
-        `;
-        alert(`⚠️ ALKALINE SOIL DETECTED!\n\nCurrent pH: ${phValue}\n\n❗ Immediate Action Required:\n• Apply elemental sulfur (1-2 lbs per 100 sq ft)\n• Add organic matter (compost/peat moss)\n• Monitor for nutrient deficiencies`);
-      }
-
-      suggestionBox.innerHTML = suggestions + '<button class="close-btn" onclick="closeSuggestions(\'ph\')">×</button>';
-      suggestionBox.style.display = 'block';
-    }
-
-    function showMoistureSuggestions() {
-      const moistureValue = parseFloat(document.getElementById('moistureValue').textContent);
-      const suggestionBox = document.getElementById('moistureSuggestions');
-      let status, statusClass, suggestions;
-
-      if (moistureValue < 670) {
-        status = "💧 LOW MOISTURE";
-        statusClass = "status-danger";
-        suggestions = `
-          <h3>📊 Moisture Analysis Results</h3>
-          <span class="${statusClass}">${status}</span>
-          <p><strong>Current Level:</strong> ${moistureValue} PPM (Below Optimal)</p>
-          
-          <h3>💧 Irrigation Required!</h3>
-          <ul>
-            <li><strong>Immediate Action:</strong> Start irrigation system NOW</li>
-            <li><strong>Water Amount:</strong> Apply 1-1.5 inches of water</li>
-            <li><strong>Duration:</strong> Run sprinklers for 30-45 minutes</li>
-            <li><strong>Frequency:</strong> Check moisture again in 4-6 hours</li>
-          </ul>
-          
-          <h3>🚨 Risk Factors:</h3>
-          <ul>
-            <li>Wilting and stress in plants</li>
-            <li>Reduced nutrient uptake</li>
-            <li>Stunted growth</li>
-            <li>Lower yield potential</li>
-          </ul>
-          
-          <h3>🔧 Prevention Tips:</h3>
-          <ul>
-            <li>Install drip irrigation for consistent moisture</li>
-            <li>Add mulch to retain soil moisture</li>
-            <li>Consider soil amendments like compost</li>
-            <li>Schedule regular irrigation cycles</li>
-          </ul>
-        `;
-        alert(`💧 LOW MOISTURE ALERT!\n\nCurrent Level: ${moistureValue} PPM\n\n⚠️ IMMEDIATE ACTION:\n• START IRRIGATION NOW\n• Apply 1-1.5 inches of water\n• Risk of crop stress and wilting\n• Check again in 4-6 hours`);
-      } else if (moistureValue >= 670 && moistureValue <= 700) {
-        status = "✅ OPTIMAL MOISTURE";
-        statusClass = "status-good";
-        suggestions = `
-          <h3>📊 Moisture Analysis Results</h3>
-          <span class="${statusClass}">${status}</span>
-          <p><strong>Current Level:</strong> ${moistureValue} PPM (Perfect Range)</p>
-          
-          <h3>🌱 Excellent Moisture Conditions!</h3>
-          <p>Your soil moisture is ideal for:</p>
-          <ul>
-            <li>Optimal root water absorption</li>
-            <li>Maximum nutrient transport</li>
-            <li>Healthy microbial activity</li>
-            <li>Perfect growing conditions</li>
-          </ul>
-          
-          <h3>📅 Maintenance Schedule:</h3>
-          <ul>
-            <li><strong>Morning Check:</strong> Test moisture at 6-7 AM</li>
-            <li><strong>Evening Check:</strong> Test again at 5-6 PM</li>
-            <li><strong>Light Watering:</strong> If needed, apply 0.5 inches</li>
-            <li><strong>Next Full Irrigation:</strong> In 2-3 days</li>
-          </ul>
-          
-          <h3>✨ Best Practices:</h3>
-          <ul>
-            <li>Maintain current irrigation schedule</li>
-            <li>Continue monitoring daily</li>
-            <li>Adjust based on weather conditions</li>
-          </ul>
-        `;
-        alert(`✅ OPTIMAL MOISTURE LEVEL!\n\nCurrent Level: ${moistureValue} PPM\n\n✨ Perfect Conditions:\n• Ideal for crop growth\n• Maintain current schedule\n• Check again tomorrow`);
-      } else {
-        status = "⚠️ HIGH MOISTURE";
-        statusClass = "status-warning";
-        suggestions = `
-          <h3>📊 Moisture Analysis Results</h3>
-          <span class="${statusClass}">${status}</span>
-          <p><strong>Current Level:</strong> ${moistureValue} PPM (Above Optimal)</p>
-          
-          <h3>💦 Over-Irrigation Warning!</h3>
-          <ul>
-            <li><strong>Immediate Action:</strong> STOP all irrigation</li>
-            <li><strong>Drainage:</strong> Check field drainage systems</li>
-            <li><strong>Aeration:</strong> Consider soil aeration if waterlogged</li>
-            <li><strong>Wait Period:</strong> No watering for 24-48 hours</li>
-          </ul>
-          
-          <h3>⚠️ Risk Factors:</h3>
-          <ul>
-            <li>Root rot and fungal diseases</li>
-            <li>Oxygen deprivation in root zone</li>
-            <li>Nutrient leaching</li>
-            <li>Reduced soil temperature</li>
-          </ul>
-          
-          <h3>🔧 Corrective Measures:</h3>
-          <ul>
-            <li>Improve field drainage</li>
-            <li>Add organic matter to improve soil structure</li>
-            <li>Consider raised beds for better drainage</li>
-            <li>Monitor for signs of plant stress</li>
-          </ul>
-          
-          <h3>🔍 Watch For:</h3>
-          <p>Yellow leaves, wilting despite wet soil, fungal growth, or bad odors from soil.</p>
-        `;
-        alert(`⚠️ HIGH MOISTURE WARNING!\n\nCurrent Level: ${moistureValue} PPM\n\n🛑 IMMEDIATE ACTION:\n• STOP ALL IRRIGATION\n• Risk of root rot\n• Check drainage systems\n• Wait 24-48 hours before next check`);
-      }
-
-      suggestionBox.innerHTML = suggestions + '<button class="close-btn" onclick="closeSuggestions(\'moisture\')">×</button>';
-      suggestionBox.style.display = 'block';
-    }
-
-    function closeSuggestions(type) {
-      if (type === 'ph') {
-        document.getElementById('phSuggestions').style.display = 'none';
-      } else {
-        document.getElementById('moistureSuggestions').style.display = 'none';
-      }
-    }
-
-    // Initialize sensor values on load
+    // Initialize on page load
     window.onload = function() {
-      updateSensorValues();
+      initCharts();
+      
+      // Generate initial data points
+      for (let i = 0; i < 5; i++) {
+        generateSensorData();
+      }
+      
+      // Update every 3 seconds
+      setInterval(generateSensorData, 3000);
     };
   </script>
 </body>
