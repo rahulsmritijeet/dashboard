@@ -448,7 +448,7 @@
             </div>
             <div class="current-value">
               <div class="value-number"><span id="tempValue">25.0</span></div>
-              <div class="value-unit">°C</div>
+              <div class="value-unit">C</div>
             </div>
           </div>
           
@@ -590,11 +590,11 @@
               </div>
               <div class="sensor-details">
                 <h2>Air Quality Index</h2>
-                <span id="aqiStatus" class="status status-good">Good</span>
+                <span id="aqiStatus" class="status status-danger">Hazardous</span>
               </div>
             </div>
             <div class="current-value">
-              <div class="value-number"><span id="aqiValue">45</span></div>
+              <div class="value-number"><span id="aqiValue">350</span></div>
               <div class="value-unit">AQI</div>
             </div>
           </div>
@@ -761,7 +761,7 @@
         options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 10, max: 90 } } }
       });
 
-      // Air Quality Chart
+      // Air Quality Chart - Updated range 280-420 to show 300-400 values nicely
       const aqiCtx = document.getElementById('aqiChart').getContext('2d');
       sensorData.airquality.chart = new Chart(aqiCtx, {
         type: 'line',
@@ -770,13 +770,13 @@
           datasets: [{
             label: 'AQI',
             data: [],
-            borderColor: '#a55eea',
-            backgroundColor: createGradient(aqiCtx, 'rgba(165, 94, 234, 0.3)', 'rgba(165, 94, 234, 0)'),
+            borderColor: '#ff4757',
+            backgroundColor: createGradient(aqiCtx, 'rgba(255, 71, 87, 0.3)', 'rgba(255, 71, 87, 0)'),
             fill: true,
             borderWidth: 3
           }]
         },
-        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 0, max: 200 } } }
+        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 280, max: 420 } } }
       });
     }
 
@@ -794,7 +794,7 @@
         maxId: 'tempMax',
         avgId: 'tempAvg',
         thresholds: { low: 18, high: 32 },
-        labels: { good: 'Normal', warning: 'High', danger: 'Critical' }
+        labels: { good: 'Normal', warning: 'Low', danger: 'High' }
       });
 
       // Humidity: 40-75%
@@ -806,7 +806,7 @@
         maxId: 'humMax',
         avgId: 'humAvg',
         thresholds: { low: 30, high: 70 },
-        labels: { good: 'Normal', warning: 'High', danger: 'Very High' }
+        labels: { good: 'Normal', warning: 'Low', danger: 'High' }
       });
 
       // Soil Moisture: 30-70%
@@ -818,19 +818,21 @@
         maxId: 'moistMax',
         avgId: 'moistAvg',
         thresholds: { low: 25, high: 65 },
-        labels: { good: 'Optimal', warning: 'Dry', danger: 'Critical' }
+        labels: { good: 'Optimal', warning: 'Dry', danger: 'Saturated' }
       });
 
-      // Air Quality Index: 20-150
-      const aqi = Math.round(30 + Math.random() * 70 + Math.sin(Date.now() / 8000) * 20);
-      updateSensor('airquality', aqi, timeLabel, {
+      // Air Quality Index: 300-400 (Hazardous range)
+      const aqi = Math.round(350 + (Math.random() - 0.5) * 100 + Math.sin(Date.now() / 8000) * 10);
+      // Clamp to 300-400 range
+      const clampedAqi = Math.max(300, Math.min(400, aqi));
+      updateSensor('airquality', clampedAqi, timeLabel, {
         valueId: 'aqiValue',
         statusId: 'aqiStatus',
         minId: 'aqiMin',
         maxId: 'aqiMax',
         avgId: 'aqiAvg',
-        thresholds: { low: 0, high: 100 },
-        labels: { good: 'Good', warning: 'Moderate', danger: 'Unhealthy' }
+        thresholds: { low: 320, high: 360 },
+        labels: { good: 'Hazardous', warning: 'Very Hazardous', danger: 'Severe' }
       });
     }
 
@@ -842,17 +844,31 @@
       // Update value display
       document.getElementById(config.valueId).textContent = value;
 
-      // Update status
+      // Update status - special handling for AQI (all values are dangerous)
       const statusEl = document.getElementById(config.statusId);
-      if (numValue > config.thresholds.high) {
-        statusEl.className = 'status status-danger';
-        statusEl.textContent = config.labels.danger;
-      } else if (numValue < config.thresholds.low) {
-        statusEl.className = 'status status-warning';
-        statusEl.textContent = config.labels.warning;
+      if (sensorType === 'airquality') {
+        // For AQI 300-400, use warning/danger only
+        if (numValue >= 360) {
+          statusEl.className = 'status status-danger';
+          statusEl.textContent = 'Severe';
+        } else if (numValue >= 330) {
+          statusEl.className = 'status status-danger';
+          statusEl.textContent = 'Hazardous';
+        } else {
+          statusEl.className = 'status status-warning';
+          statusEl.textContent = 'Very Unhealthy';
+        }
       } else {
-        statusEl.className = 'status status-good';
-        statusEl.textContent = config.labels.good;
+        if (numValue > config.thresholds.high) {
+          statusEl.className = 'status status-danger';
+          statusEl.textContent = config.labels.danger;
+        } else if (numValue < config.thresholds.low) {
+          statusEl.className = 'status status-warning';
+          statusEl.textContent = config.labels.warning;
+        } else {
+          statusEl.className = 'status status-good';
+          statusEl.textContent = config.labels.good;
+        }
       }
 
       // Add data point
@@ -872,13 +888,14 @@
 
       // Update statistics
       if (data.values.length > 0) {
-        const min = Math.min(...data.values).toFixed(1);
-        const max = Math.max(...data.values).toFixed(1);
-        const avg = (data.values.reduce((a, b) => a + b, 0) / data.values.length).toFixed(1);
+        const min = Math.min(...data.values).toFixed(sensorType === 'airquality' ? 0 : 1);
+        const max = Math.max(...data.values).toFixed(sensorType === 'airquality' ? 0 : 1);
+        const avg = (data.values.reduce((a, b) => a + b, 0) / data.values.length).toFixed(sensorType === 'airquality' ? 0 : 1);
         
-        document.getElementById(config.minId).textContent = min + (sensorType === 'temperature' ? ' C' : sensorType === 'airquality' ? '' : '%');
-        document.getElementById(config.maxId).textContent = max + (sensorType === 'temperature' ? ' C' : sensorType === 'airquality' ? '' : '%');
-        document.getElementById(config.avgId).textContent = avg + (sensorType === 'temperature' ? ' C' : sensorType === 'airquality' ? '' : '%');
+        const unit = sensorType === 'temperature' ? ' C' : sensorType === 'airquality' ? '' : '%';
+        document.getElementById(config.minId).textContent = min + unit;
+        document.getElementById(config.maxId).textContent = max + unit;
+        document.getElementById(config.avgId).textContent = avg + unit;
       }
     }
 
